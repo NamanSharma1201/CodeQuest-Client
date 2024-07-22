@@ -207,7 +207,7 @@ const CodeEditor = () => {
             }));
 
             let res = await updateProblemStats(problemID, submissions, accuracy, correctSubmission);
-
+            console.log(res);
             if (isAccepted) {
                 res = await updateSolvedProblems(email, problemID);
                 dispatch(setSolvedProblems(res));

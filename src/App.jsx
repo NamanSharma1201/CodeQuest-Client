@@ -16,6 +16,7 @@ import SolveProblem from "./pages/SolveProblem";
 import CreateProblem from "./pages/CreateProblem";
 import ReadBlog from "./pages/ReadBlog";
 import CreateBlog from "./pages/CreateBlog";
+import Contest from "./pages/Contest";
 const theme = createTheme();
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
             <Route path="create-blog" element={<CreateBlog />} />
 
             <Route path="blogs" element={<Blogs />} />
+            <Route path="contest" element={<Contest />} />
             <Route path="blog/:id" element={<ReadBlog />} />
 
             <Route path="problem/:id" element={<SolveProblem />} />

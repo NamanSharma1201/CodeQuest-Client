@@ -44,8 +44,10 @@ const Registration = () => {
           dispatch(setUser({ name: actualData.name, email: actualData.email, problemsSolved: [] }));
 
           // Store user data in localStorage
+
           localStorage.setItem('name', actualData.name);
           localStorage.setItem('email', actualData.email);
+          localStorage.setItem('role', 'user');
 
           // Trigger Navbar update
           window.dispatchEvent(new Event('storage'));
