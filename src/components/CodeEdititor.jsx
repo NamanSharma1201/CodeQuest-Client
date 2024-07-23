@@ -26,7 +26,8 @@ import {
     Paper,
     Alert,
     Snackbar,
-    Typography
+    Typography,
+    CircularProgress
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
@@ -69,6 +70,13 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
         '&.Mui-focused fieldset': {
             borderColor: '#909090',
         },
+    },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+    '&.Mui-disabled': {
+        backgroundColor: theme.palette.action.disabledBackground,
+        color: theme.palette.action.disabled,
     },
 }));
 
@@ -130,9 +138,9 @@ const CodeEditor = () => {
     const [showNotLoginBanner, setShowNotLoginBanner] = useState(false);
     const [showCelebration, setShowCelebration] = useState(false);
     const [theme, setTheme] = useState('dracula');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        // Set initial code based on language
         const initialCode = {
             javascript: '// Write your JavaScript code here\n\nfunction main() {\n  // Your code here\n}\n\nmain();',
             python: '# Write your Python code here\n\ndef main():\n    # Your code here\n    pass\n\nif __name__ == "__main__":\n    main()',
@@ -174,11 +182,14 @@ const CodeEditor = () => {
             return;
         }
 
+        setIsLoading(true);
         try {
             const response = await runCode(getExtension(language), code, input);
-            setOutput(response);
+            setOutput(response.output);
         } catch (error) {
             setOutput(`Error running code: ${error.message}`);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -188,14 +199,15 @@ const CodeEditor = () => {
             return;
         }
 
+        setIsLoading(true);
         try {
             const response = await submitCode(getExtension(language), code, hiddenInputs, hiddenOutputs);
 
-            const isAccepted = response === 'ACCEPTED';
+            const isAccepted = response.output === 'ACCEPTED';
 
             if (isAccepted) {
                 setShowCelebration(true);
-                setTimeout(() => setShowCelebration(false), 5000); // Hide after 5 seconds
+                setTimeout(() => setShowCelebration(false), 5000);
             }
 
             dispatch(setProblem({
@@ -207,15 +219,17 @@ const CodeEditor = () => {
             }));
 
             let res = await updateProblemStats(problemID, submissions, accuracy, correctSubmission);
-            console.log(res);
+
             if (isAccepted) {
                 res = await updateSolvedProblems(email, problemID);
                 dispatch(setSolvedProblems(res));
             }
 
-            setOutput(response);
+            setOutput(response.output);
         } catch (error) {
             setOutput(`Error submitting code: ${error.message}`);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -294,13 +308,49 @@ const CodeEditor = () => {
                     />
                 </Box>
 
-                <Box mt={2} display="flex" justifyContent="space-between">
-                    <Button variant="contained" color="primary" onClick={handleRun} style={{ width: '48%' }}>
+                <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
+                    <StyledButton
+                        variant="contained"
+                        color="primary"
+                        onClick={handleRun}
+                        disabled={isLoading}
+                        style={{ width: '48%', position: 'relative' }}
+                    >
                         Run Code
-                    </Button>
-                    <Button variant="contained" color="secondary" onClick={handleSubmit} style={{ width: '48%' }}>
+                        {isLoading && (
+                            <CircularProgress
+                                size={24}
+                                style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    marginTop: -12,
+                                    marginLeft: -12,
+                                }}
+                            />
+                        )}
+                    </StyledButton>
+                    <StyledButton
+                        variant="contained"
+                        color="secondary"
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                        style={{ width: '48%', position: 'relative' }}
+                    >
                         Submit Code
-                    </Button>
+                        {isLoading && (
+                            <CircularProgress
+                                size={24}
+                                style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    marginTop: -12,
+                                    marginLeft: -12,
+                                }}
+                            />
+                        )}
+                    </StyledButton>
                 </Box>
             </StyledPaper>
         </>
